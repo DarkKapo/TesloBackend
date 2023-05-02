@@ -11,6 +11,10 @@ export class MessagesWsGateway implements OnGatewayConnection, OnGatewayDisconne
   constructor(private readonly messagesWsService: MessagesWsService) {}
 
   handleConnection( client: Socket ) {
+    //as string es para que lo trate como un string
+    const token = client.handshake.headers.authentication as string
+    console.log({ token });
+    
     this.messagesWsService.registerClient( client )
     //emitir el mensaje a todos
     this.wss.emit('clients-update', this.messagesWsService.getConnectedClients())
