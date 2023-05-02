@@ -16,20 +16,20 @@ export class MessagesWsGateway implements OnGatewayConnection, OnGatewayDisconne
     private readonly jwtService: JwtService
   ) {}
 
-  handleConnection( client: Socket ) {
+  async handleConnection( client: Socket ) {
     //as string es para que lo trate como un string
     const token = client.handshake.headers.authentication as string
     let payload: JwtPayload
     try {
       //Verificar el token
       payload = this.jwtService.verify( token )
+      await this.messagesWsService.registerClient( client, payload.id )
     } catch (error) {
       //desconecta al cliente
       client.disconnect()
       return
     }
     
-    this.messagesWsService.registerClient( client )
     //emitir el mensaje a todos
     this.wss.emit('clients-update', this.messagesWsService.getConnectedClients())
   }
@@ -55,7 +55,7 @@ export class MessagesWsGateway implements OnGatewayConnection, OnGatewayDisconne
 
     //Emitir mensajes a todos
     this.wss.emit('message-from-server', {
-      fullName: 'Yo',
+      fullName: this.messagesWsService.getUserFullName( client.id ),
       message: payload.message || 'no-message'
     })
   }
