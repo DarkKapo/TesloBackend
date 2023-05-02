@@ -25,3 +25,7 @@ npm run start:dev
 ```
 http://localhost:3000/api/seed
 ```
+8. Ir a swagger para probar los endpoints
+```
+http://localhost:3000/api
+```
