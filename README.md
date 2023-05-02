@@ -29,3 +29,13 @@ http://localhost:3000/api/seed
 ```
 http://localhost:3000/api
 ```
+
+# Dependencias
+
+* NestJS
+* bcrypt
+* Postgres
+* socket.io
+* uuid
+* passport-jwt
+* class-validator
