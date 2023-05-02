@@ -1,5 +1,7 @@
+import { JwtService } from '@nestjs/jwt';
 import { OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { JwtPayload } from '../auth/interfaces';
 import { NewMessageDto } from './dtos/new-message.dto';
 import { MessagesWsService } from './messages-ws.service';
 
@@ -8,12 +10,24 @@ export class MessagesWsGateway implements OnGatewayConnection, OnGatewayDisconne
   //Enviar mensajes a todos los usuarios
   @WebSocketServer() wss: Server
 
-  constructor(private readonly messagesWsService: MessagesWsService) {}
+  constructor(
+    private readonly messagesWsService: MessagesWsService,
+    //Importar JwtServices para validar el token
+    private readonly jwtService: JwtService
+  ) {}
 
   handleConnection( client: Socket ) {
     //as string es para que lo trate como un string
     const token = client.handshake.headers.authentication as string
-    console.log({ token });
+    let payload: JwtPayload
+    try {
+      //Verificar el token
+      payload = this.jwtService.verify( token )
+    } catch (error) {
+      //desconecta al cliente
+      client.disconnect()
+      return
+    }
     
     this.messagesWsService.registerClient( client )
     //emitir el mensaje a todos
